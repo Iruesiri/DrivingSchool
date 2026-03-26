@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="DrivingSchool.Application/DrivingSchool.Application.csproj" />
+  <Project Path="DrivingSchool.Domain/DrivingSchool.Domain.csproj" />
+  <Project Path="DrivingSchool.Infrastructure/DrivingSchool.Infrastructure.csproj" />
+  <Project Path="DrivingSchool/DrivingSchool.csproj" />
+</Solution>

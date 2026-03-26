@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DrivingSchool.Domain\DrivingSchool.Domain.csproj" />
+    <ProjectReference Include="..\DrivingSchool.Infrastructure\DrivingSchool.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
