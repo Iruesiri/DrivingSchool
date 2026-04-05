@@ -2,7 +2,6 @@
 using DrivingSchool.Domain.Entities;
 using DrivingSchool.Model;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 
 namespace DrivingSchool.Services
 {
@@ -10,6 +9,9 @@ namespace DrivingSchool.Services
     {
         Task<AuthResponse> RegisterAsync(UserDto request);
         Task<AuthResponse> LoginAsync(LoginDto request);
+        Task<List<User>> GetAllAsync();
+        Task<User> GetByEmailAsync(string email);
+        Task<User> GetByUserIdAsync(int id);
     }
 
     public class AuthService : IAuthService
@@ -26,6 +28,21 @@ namespace DrivingSchool.Services
             _configuration = configuration;
         }
 
+        public async Task<List<User>> GetAllAsync()
+        {
+            return await _userRepository.GetAllAsync();
+        }
+        
+        public async Task<User> GetByEmailAsync(string email)
+        {
+            return await _userRepository.GetByEmailAsync(email);
+        }
+
+        public async Task<User> GetByUserIdAsync(int id)
+        {
+            return await _userRepository.GetByIdAsync(id);
+        }
+
         public async Task<AuthResponse> RegisterAsync(UserDto request)
         {
             var existingUser = await _userRepository.GetByEmailAsync(request.Email);
@@ -37,6 +54,9 @@ namespace DrivingSchool.Services
             {
                 //Id = Guid.NewGuid(),
                 Email = request.Email,
+                Username = request.Username,
+                Address = request.Address,
+                PhoneNumber = request.PhoneNumber,
                 PasswordHash =new PasswordHasher<UserDto>().HashPassword(request, request.Password),
                 Role = request.Role
             };

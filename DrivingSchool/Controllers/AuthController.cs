@@ -42,5 +42,22 @@ namespace DrivingSchool.Controllers
         {
             return Ok("You are an authenticated Admin!");
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = await _authService.GetAllAsync();
+            return Ok(users);
+        }
+
+        [HttpGet("{email}")]
+        public async Task<IActionResult> GetUserByEmail(string email)
+        {
+            var user = await _authService.GetByEmailAsync(email);
+            if (user == null)
+                return NotFound();
+            return Ok(user);
+        }
     }
 }

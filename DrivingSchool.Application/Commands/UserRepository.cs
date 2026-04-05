@@ -2,9 +2,6 @@
 using DrivingSchool.Domain.Entities;
 using DrivingSchool.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DrivingSchool.Application.Commands
 {
@@ -15,6 +12,16 @@ namespace DrivingSchool.Application.Commands
         public UserRepository(AppDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<List<User>> GetAllAsync()
+        {
+            return await _context.Users.ToListAsync();
+        }
+
+        public async Task<User?> GetByIdAsync(int id)
+        {
+            return await _context.Users.FindAsync(id);
         }
 
         public async Task<User?> GetByEmailAsync(string email)
