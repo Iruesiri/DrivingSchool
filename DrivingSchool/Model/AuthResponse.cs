@@ -1,6 +1,6 @@
 ﻿namespace DrivingSchool.Model
 {
-    public class AuthResponse : Response
+    public class AuthResponse : Response<AuthResponse>
     {
         public string Token { get; set; } = default!;
         public string Email { get; set; } = default!;

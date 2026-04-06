@@ -11,10 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISchedulingService, SchedulingService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 //Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 //DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
