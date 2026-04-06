@@ -12,20 +12,20 @@ namespace DrivingSchool.Services
         Task<List<User>> GetAllAsync();
         Task<User> GetByEmailAsync(string email);
         Task<User> GetByUserIdAsync(int id);
+        Task DeleteAsync(int id);
+        Task UpdateAsync(int id, UserDto request);
     }
 
     public class AuthService : IAuthService
     {
         private readonly IUserRepository _userRepository;
         private readonly IJwtTokenService _jwtService;
-        private readonly IConfiguration _configuration;
 
         public AuthService(IUserRepository userRepository,
         IJwtTokenService jwtService, IConfiguration configuration)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
-            _configuration = configuration;
         }
 
         public async Task<List<User>> GetAllAsync()
@@ -41,6 +41,27 @@ namespace DrivingSchool.Services
         public async Task<User> GetByUserIdAsync(int id)
         {
             return await _userRepository.GetByIdAsync(id);
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null)
+                throw new Exception("User not found");
+            await _userRepository.DeleteAsync(user);
+        }
+
+        public async Task UpdateAsync(int id, UserDto request)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null)
+                throw new Exception("User not found");
+            user.Email = request.Email;
+            user.Username = request.Username;
+            user.Address = request.Address;
+            user.PhoneNumber = request.PhoneNumber;
+            user.Role = request.Role;
+            await _userRepository.UpdateAsync(user);
         }
 
         public async Task<AuthResponse> RegisterAsync(UserDto request)
