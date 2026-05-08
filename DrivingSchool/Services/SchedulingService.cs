@@ -6,82 +6,97 @@ namespace DrivingSchool.Services
 {
     public interface ISchedulingService
     {
-        Task<Response<AvailabilitySlot>> CreateAvailability(AvailabilitySlotDto request);
-        Task<List<AvailabilitySlot>> GetAllAsync();
-        Task<AvailabilitySlot> GetByIdAsync(int id);
+        Task<Response<LessonSession>> ScheduleSession(LessonSessionDto request);
+        Task<List<LessonSession>> GetAllAsync();
+        Task<List<LessonSession>> GetSessionsByDriverIdAsync(int driverId);
+        Task<List<LessonSession>> GetSessionByDriverIdAsync(int driverId, DateTime requestedStart, DateTime requestedEnd);
+        Task<LessonSession> GetByIdAsync(int id);
         Task DeleteAsync(int id);
-        Task UpdateAsync(int id, AvailabilitySlotDto request);
+        Task UpdateAsync(int id, LessonSessionDto request);
     }
     public class SchedulingService : ISchedulingService
     {
         private readonly IRepository<AvailabilitySlot> _availabilitySlotRepository;
-        private readonly IJwtTokenService _jwtService;
+        private readonly IRepository<LessonSession> _lessonSessionRepository;
 
-        public SchedulingService(IRepository<AvailabilitySlot> availabilitySlotRepository,
-        IJwtTokenService jwtService, IConfiguration configuration)
+        public SchedulingService(IRepository<AvailabilitySlot> availabilitySlotRepository, IRepository<LessonSession> lessonSessionRepository, IConfiguration configuration)
         {
             _availabilitySlotRepository = availabilitySlotRepository;
-            _jwtService = jwtService;
+            _lessonSessionRepository = lessonSessionRepository;
         }
 
-        public async Task<Response<AvailabilitySlot>> CreateAvailability(AvailabilitySlotDto request)
+        public async Task DeleteAsync(int id)
         {
-            if(request.StartTime < DateTime.Now || request.StartTime >= request.EndTime)
+            var session = await _lessonSessionRepository.GetByIdAsync(id);
+            if (session != null)
             {
-                return new Response<AvailabilitySlot>
+                await _lessonSessionRepository.DeleteAsync(session);
+            }
+            else
+            {
+                throw new Exception("Lesson session not found.");
+            }
+        }
+
+        public async Task<List<LessonSession>> GetAllAsync()
+        {
+            return await _lessonSessionRepository.GetAllAsync();
+        }
+
+        public async Task<LessonSession> GetByIdAsync(int id)
+        {
+            return await _lessonSessionRepository.GetByIdAsync(id);
+        }
+
+        public async Task<List<LessonSession>> GetSessionsByDriverIdAsync(int driverId)
+        {
+            return await _lessonSessionRepository.FindAsync(x => x.InstructorId == driverId);
+        }
+
+        public async Task<List<LessonSession>> GetSessionByDriverIdAsync(int driverId, DateTime requestedStart, DateTime requestedEnd)
+        {
+            return await _lessonSessionRepository.FindAsync(s => s.InstructorId == driverId && s.StartTime < requestedEnd && s.EndTime > requestedStart);
+        }
+
+        public async Task<Response<LessonSession>> ScheduleSession(LessonSessionDto request)
+        {
+            if (request.StartTime < DateTime.Now || request.StartTime >= request.EndTime)
+            {
+                return new Response<LessonSession>
                 {
                     Success = false,
                     Message = "Start time must be accurate."
                 };
             }
 
-            var availability = new AvailabilitySlot
+            LessonSession session = new LessonSession
             {
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
-                InstructorId = request.InstructorId
+                InstructorId = request.InstructorId,
+                ClientId = request.ClientId,
+                Status = request.Status
             };
-
-            await _availabilitySlotRepository.AddAsync(availability);
-            return new Response<AvailabilitySlot> { Success = true , Message = "Availability slot created successfully", Data = availability };
+            await _lessonSessionRepository.AddAsync(session);
+            return new Response<LessonSession> { Success = true, Message = "Lesson session created successfully", Data = session };
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task UpdateAsync(int id, LessonSessionDto request)
         {
-            var availability = await _availabilitySlotRepository.GetByIdAsync(id);
-            if (availability != null)
+            var session = await _lessonSessionRepository.GetByIdAsync(id);
+            if (session != null)
             {
-                await _availabilitySlotRepository.DeleteAsync(availability);
+                session.StartTime = request.StartTime;
+                session.EndTime = request.EndTime;
+                session.InstructorId = request.InstructorId;
+                session.ClientId = request.ClientId;
+                session.Status = request.Status;
+
+                await _lessonSessionRepository.UpdateAsync(session);
             }
             else
             {
-                throw new Exception("Availability slot not found.");
-            }
-        }
-
-        public async Task<List<AvailabilitySlot>> GetAllAsync()
-        {
-            return await _availabilitySlotRepository.GetAllAsync();
-        }
-
-        public async Task<AvailabilitySlot> GetByIdAsync(int id)
-        {
-            return await _availabilitySlotRepository.GetByIdAsync(id);
-        }
-
-        public async Task UpdateAsync(int id, AvailabilitySlotDto request)
-        {
-            var availability = await _availabilitySlotRepository.GetByIdAsync(id);
-            if (availability != null)
-            {
-                availability.StartTime = request.StartTime;
-                availability.EndTime = request.EndTime;
-
-                await _availabilitySlotRepository.UpdateAsync(availability);
-            }
-            else
-            {
-                throw new Exception("Availability slot not found.");
+                throw new Exception("Lesson session not found.");
             }
         }
     }

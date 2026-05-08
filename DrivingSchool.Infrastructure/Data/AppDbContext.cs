@@ -9,6 +9,7 @@ namespace DrivingSchool.Infrastructure.Data
     public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
         public DbSet<AvailabilitySlot> AvailabilitySlots { get; set; }
+        public DbSet<LessonSession> LessonSessions { get; set; }
         public DbSet<User> Users { get; set; }
     }
 }

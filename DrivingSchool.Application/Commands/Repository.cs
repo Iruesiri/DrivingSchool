@@ -3,6 +3,7 @@ using DrivingSchool.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace DrivingSchool.Application.Commands
@@ -26,6 +27,19 @@ namespace DrivingSchool.Application.Commands
         {
             _context.Set<T>().Remove(entity);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _context.Set<T>()
+                .Where(predicate)
+                .ToListAsync();
+        }
+
+        public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _context.Set<T>()
+                .FirstOrDefaultAsync(predicate);
         }
 
         public async Task<List<T>> GetAllAsync()
