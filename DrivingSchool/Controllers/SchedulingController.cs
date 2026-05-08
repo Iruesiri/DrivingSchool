@@ -1,4 +1,5 @@
-﻿using DrivingSchool.Model;
+﻿using DrivingSchool.Domain.Entities;
+using DrivingSchool.Model;
 using DrivingSchool.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,14 +15,13 @@ namespace DrivingSchool.Controllers
             _schedulingService = schedulingService;
         }
 
-        [HttpPost("availability")]
-        public async Task<ActionResult> CreateAvailability(AvailabilitySlotDto request)
+        [HttpPost]
+        public async Task<ActionResult> ScheduleSession(LessonSessionDto request)
         {
-            var availability = await _schedulingService.CreateAvailability(request);
-            if (availability is null)
-                return BadRequest("An error occurred while creating availability");
-
-            return Ok(availability);
+            var lessonSession = await _schedulingService.ScheduleSession(request);
+            if (lessonSession is null)
+                return BadRequest("An error occurred while creating lesson session");
+            return Ok(lessonSession);
         }
 
         [HttpGet]
@@ -31,14 +31,24 @@ namespace DrivingSchool.Controllers
             return Ok(availabilitySlots);
         }
 
+        //Get driver availability
+        [HttpGet("driver/{id}")]
+        public async Task<ActionResult> GetSessionByDriverId(int id)
+        {
+            var session = await _schedulingService.GetSessionsByDriverIdAsync(id);
+            if (session == null)
+                return NotFound($"Session not found for driver with ID {id}");
+            return Ok(session);
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult> GetById(int id)
         {
-            var availability = await _schedulingService.GetByIdAsync(id);
-            if (availability is null)
-                return NotFound("Availability slot not found");
+            var session = await _schedulingService.GetByIdAsync(id);
+            if (session is null)
+                return NotFound("Session not found");
 
-            return Ok(availability);
+            return Ok(session);
         }
 
         [HttpDelete("{id}")]
@@ -56,7 +66,7 @@ namespace DrivingSchool.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, AvailabilitySlotDto request)
+        public async Task<ActionResult> Update(int id, LessonSessionDto request)
         {
             await _schedulingService.UpdateAsync(id, request);
 
